@@ -1,0 +1,13 @@
+{
+  "keys": [
+    {
+      "kty": "EC",
+      "crv": "P-256",
+      "kid": "kanidm-test",
+      "alg": "ES256",
+      "use": "sig",
+      "x": "kbUO0NZjCnqo0PbBvjmL08b6iGIjLvVYdYSsBoAwVq0",
+      "y": "eCw81Tt6eYdFaWIKzPo4wNDjl8u6rNnASut_wG--DOM"
+    }
+  ]
+}

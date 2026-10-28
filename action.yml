@@ -1,0 +1,64 @@
+name: hanko sign
+description: Sign an Android AAB or APK on a hanko server, authenticated by the job's GitHub OIDC token.
+
+inputs:
+  server:
+    description: hanko base URL, e.g. https://sign.example.com
+    required: true
+  profile:
+    description: hanko profile to sign with
+    required: true
+  file:
+    description: Unsigned AAB or APK
+    required: true
+  output:
+    description: Where to write the signed file
+    required: true
+  audience:
+    description: OIDC audience hanko expects. Defaults to the server URL.
+    required: false
+    default: ""
+
+runs:
+  using: composite
+  steps:
+    - shell: bash
+      env:
+        HANKO_SERVER: ${{ inputs.server }}
+        HANKO_PROFILE: ${{ inputs.profile }}
+        HANKO_FILE: ${{ inputs.file }}
+        HANKO_OUTPUT: ${{ inputs.output }}
+        HANKO_AUDIENCE: ${{ inputs.audience }}
+      run: |
+        set -euo pipefail
+
+        if [ -z "${ACTIONS_ID_TOKEN_REQUEST_URL:-}" ]; then
+          echo "::error::hanko needs an OIDC token. Add 'permissions: id-token: write' to the job."
+          exit 1
+        fi
+
+        server="${HANKO_SERVER%/}"
+        audience="${HANKO_AUDIENCE:-$server}"
+
+        token="$(curl -sSf --get \
+          -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+          --data-urlencode "audience=$audience" \
+          "$ACTIONS_ID_TOKEN_REQUEST_URL" | jq -r .value)"
+        echo "::add-mask::$token"
+
+        if ! status="$(curl -sS -o "$HANKO_OUTPUT" -w '%{http_code}' \
+          -H "Authorization: Bearer $token" \
+          -H "Content-Type: application/octet-stream" \
+          --data-binary "@$HANKO_FILE" \
+          "$server/v1/sign/$HANKO_PROFILE")"; then
+          echo "::error::sending $HANKO_FILE to hanko failed"
+          rm -f "$HANKO_OUTPUT"
+          exit 1
+        fi
+
+        if [ "$status" != 200 ]; then
+          echo "::error::hanko refused to sign with HTTP $status: $(head -c 200 "$HANKO_OUTPUT")"
+          rm -f "$HANKO_OUTPUT"
+          exit 1
+        fi
+        echo "Signed $HANKO_FILE -> $HANKO_OUTPUT ($(sha256sum "$HANKO_OUTPUT" | cut -d' ' -f1))"
