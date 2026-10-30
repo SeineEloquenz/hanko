@@ -22,9 +22,7 @@ rustPlatform.buildRustPackage {
     fileset = fs.unions [
       (root + "/Cargo.toml")
       (root + "/Cargo.lock")
-      (root + "/src")
-      (root + "/sign")
-      (root + "/tests")
+      (root + "/crates")
     ];
   };
 

@@ -1,33 +1,7 @@
 [workspace]
-members = ["sign"]
+resolver = "3"
+members = ["crates/*"]
 
 [workspace.package]
 version = "0.1.0"
 edition = "2024"
-
-[package]
-name = "hanko"
-version.workspace = true
-edition.workspace = true
-
-[dependencies]
-axum = "0.8.9"
-clap = { version = "4.6.7", features = ["derive"] }
-futures-util = "0.3.34"
-hex = "0.4.3"
-jsonwebtoken = { version = "11.1.0", features = ["rust_crypto"] }
-reqwest = { version = "0.13.5", default-features = false, features = ["rustls", "json"] }
-serde = { version = "1.0.229", features = ["derive"] }
-serde_json = "1.0.154"
-sha2 = "0.11.1"
-tempfile = "3.27.0"
-thiserror = "2.0.21"
-tokio = { version = "1.54.1", features = ["rt-multi-thread", "macros", "net", "signal", "fs", "process", "sync", "time"] }
-tokio-util = { version = "0.7.15", features = ["io"] }
-tracing = "0.1.44"
-tracing-journald = "0.3.2"
-tracing-subscriber = { version = "0.3.23", features = ["env-filter"] }
-url = { version = "2.5.8", features = ["serde"] }
-
-[dev-dependencies]
-tower = { version = "0.5.3", features = ["util"] }

@@ -7,7 +7,7 @@ let
   issuerRoot = pkgs.runCommand "fake-kanidm" { } ''
     dir=$out/oauth2/openid/hanko
     mkdir -p $dir/.well-known
-    cp ${../../tests/fixtures/kanidm-jwks.json} $dir/public_key.jwk
+    cp ${../../crates/hanko/tests/fixtures/kanidm-jwks.json} $dir/public_key.jwk
     echo '{"issuer": "${issuer}", "jwks_uri": "${issuer}/public_key.jwk"}' \
       > $dir/.well-known/openid-configuration
   '';
@@ -83,7 +83,7 @@ let
             "client_id": "hanko",
             "scope": "openid sign",
         }
-        key = open("${../../tests/fixtures/kanidm-key.pem}").read()
+        key = open("${../../crates/hanko/tests/fixtures/kanidm-key.pem}").read()
         headers = {"kid": "kanidm-test", "typ": "at+jwt"}
         print(jwt.encode(claims, key, algorithm="ES256", headers=headers))
       '';
